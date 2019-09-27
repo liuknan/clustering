@@ -11,7 +11,14 @@ def point_avg(points):
     
     Returns a new point which is the center of all the points.
     """
-    raise NotImplementedError()
+    ret = []
+    m = len(points)
+    sum_of_vector = [0] * m
+    for i in points:
+        sum_of_vector = [v_i + w_i for v_i, w_i in zip(sum_of_vector, i)]
+    for j in sum_of_vector:
+        ret.append(j/m)
+    return ret
 
 
 def update_centers(data_set, assignments):
@@ -21,11 +28,19 @@ def update_centers(data_set, assignments):
     Compute the center for each of the assigned groups.
     Return `k` centers in a list
     """
-    raise NotImplementedError()
+    centers = []
+    m = len(data_set)
+    ret = defaultdict(list)
+    for i in range(m):
+        ret[assignments[i]].append(data_set[i])
+    for j in ret.keys():
+        centers.append(point_avg(ret[j]))
+    return centers
 
 
 def assign_points(data_points, centers):
     """
+    assign points to each cluster
     """
     assignments = []
     for point in data_points:
@@ -44,7 +59,11 @@ def distance(a, b):
     """
     Returns the Euclidean distance between a and b
     """
-    raise NotImplementedError()
+    dimension = len(a)
+    point_distance = 0
+    for i in range(dimension):
+        point_distance = point_distance + (float(a[i]) - float(b[i]))**2
+    return point_distance
 
 
 def generate_k(data_set, k):
@@ -52,15 +71,32 @@ def generate_k(data_set, k):
     Given `data_set`, which is an array of arrays,
     return a random set of k points from the data_set
     """
-    raise NotImplementedError()
+    return random.sample(data_set, k)
 
 
 def get_list_from_dataset_file(dataset_file):
-    raise NotImplementedError()
+
+    """
+    :param dataset_file: get data from dataset
+    :return: a list of data
+    """
+
+    with open(dataset_file,'r') as f:
+        data = csv.reader(f)
+        return [list(map(int, point)) for point in data]
 
 
-def cost_function(clustering):
-    raise NotImplementedError()
+def cost_function(clustering:defaultdict):
+    """
+    :param clustering: calculate the cost function
+    :return:
+    """
+    cost = 0
+    for points in clustering.keys():
+        center = point_avg(clustering[points])
+        for point in clustering[points]:
+            cost = cost + distance(center, point)
+    return cost
 
 
 def k_means(dataset_file, k):
